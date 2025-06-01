@@ -11,17 +11,34 @@ end
 getgenv().cyberline_chams = {}
 
 run_service.RenderStepped:Connect(function()
-	for _, player in ipairs(players:GetPlayers()) do
-		if player ~= local_player and player.Character then
-			if not getgenv().cyberline_chams[player] then
-				local highlight = Instance.new("Highlight")
-				highlight.FillColor = Color3.fromRGB(255, 255, 255)
-				highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
-				highlight.FillTransparency = 0.8
-				highlight.OutlineTransparency = 1
-				highlight.Adornee = player.Character
-				highlight.Parent = game.CoreGui
-				getgenv().cyberline_chams[player] = highlight
+	local survivors = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Survivors")
+	local killers = workspace:FindFirstChild("Players") and workspace.Players:FindFirstChild("Killers")
+
+	for _, folder_data in ipairs({
+		{ folder = survivors, color = Color3.fromRGB(255, 255, 255) },
+		{ folder = killers, color = Color3.fromRGB(255, 0, 0) }
+	}) do
+		local folder = folder_data.folder
+		local fill_color = folder_data.color
+
+		if folder then
+			for _, char in ipairs(folder:GetChildren()) do
+				local player = players:GetPlayerFromCharacter(char)
+				if player and player ~= local_player then
+					if not getgenv().cyberline_chams[player] then
+						local highlight = Instance.new("Highlight")
+						highlight.FillColor = fill_color
+						highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+						highlight.FillTransparency = 0.8
+						highlight.OutlineTransparency = 1
+						highlight.Adornee = char
+						highlight.Parent = game.CoreGui
+						getgenv().cyberline_chams[player] = highlight
+					else
+						getgenv().cyberline_chams[player].Adornee = char
+						getgenv().cyberline_chams[player].FillColor = fill_color
+					end
+				end
 			end
 		end
 	end
