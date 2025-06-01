@@ -11,7 +11,7 @@ getgenv().cyberline_generator_esp = {}
 
 local function create_text()
 	local text = Drawing.new("Text")
-	text.Color = Color3.fromRGB(0, 255, 0) -- Green
+	text.Color = Color3.fromRGB(0, 255, 0)
 	text.Size = 12
 	text.Font = 2
 	text.Center = true
@@ -49,13 +49,13 @@ run_service.RenderStepped:Connect(function()
 
 			local label = getgenv().cyberline_generator_esp[obj]
 			local root = get_primary_part(obj)
-			local progress_value = obj:FindFirstChild("Progress")
+			local progress = obj:FindFirstChild("Progress")
 
-			if root and progress_value and progress_value:IsA("NumberValue") then
-				local pos, visible = camera:WorldToViewportPoint(root.Position + Vector3.new(0, 3, 0))
-				if visible then
-					label.Position = Vector2.new(pos.X, pos.Y)
-					label.Text = "Generator: " .. tostring(math.floor(progress_value.Value)) .. "%"
+			if root and progress and progress:IsA("NumberValue") then
+				local screen_pos, on_screen = camera:WorldToViewportPoint(root.Position + Vector3.new(0, 3, 0))
+				if on_screen then
+					label.Position = Vector2.new(screen_pos.X, screen_pos.Y)
+					label.Text = "Generator: " .. math.floor(progress.Value) .. "%"
 					label.Visible = true
 				else
 					label.Visible = false
