@@ -1,7 +1,7 @@
 local players = game:GetService("Players")
 local run_service = game:GetService("RunService")
-local local_player = players.LocalPlayer
 local camera = workspace.CurrentCamera
+local local_player = players.LocalPlayer
 
 if getgenv().cyberline_health_bars then
 	for _, data in pairs(getgenv().cyberline_health_bars) do
@@ -42,10 +42,14 @@ local function get_bounds(character)
 end
 
 run_service.RenderStepped:Connect(function()
+	local active_players = {}
+
 	for _, player in ipairs(players:GetPlayers()) do
 		if player ~= local_player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
 			local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
-			if humanoid then
+			if humanoid and humanoid.Health > 0 then
+				active_players[player] = true
+
 				local min, max = get_bounds(player.Character)
 				local points = {
 					Vector3.new(min.X, min.Y, min.Z),
@@ -96,9 +100,22 @@ run_service.RenderStepped:Connect(function()
 					outline.Visible = false
 				end
 			end
-		elseif getgenv().cyberline_health_bars[player] then
-			getgenv().cyberline_health_bars[player].bar.Visible = false
-			getgenv().cyberline_health_bars[player].outline.Visible = false
 		end
+	end
+
+	for player, data in pairs(getgenv().cyberline_health_bars) do
+		if not active_players[player] then
+			data.bar.Visible = false
+			data.outline.Visible = false
+		end
+	end
+end)
+
+players.PlayerRemoving:Connect(function(player)
+	local data = getgenv().cyberline_health_bars[player]
+	if data then
+		pcall(function() data.bar:Remove() end)
+		pcall(function() data.outline:Remove() end)
+		getgenv().cyberline_health_bars[player] = nil
 	end
 end)
